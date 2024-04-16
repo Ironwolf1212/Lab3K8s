@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: authserviceDeployment
+metadata:
+  name: authservice-deployment
+spec:
+  selector:
+      matchLabels:
+          run: authservice-container
+  replicas: 1
+  template:
+      metadata:
+          labels:
+              run: authservice-container
+      spec:
+        containers:
+          - name: authservice-container
+            image: ironwolf1212/authservice
+            ports:
+            - containerPort: 3000

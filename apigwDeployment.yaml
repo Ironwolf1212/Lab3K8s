@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: apigwDeployment
+metadata:
+  name: apigw-deployment
+spec:
+  selector:
+      matchLabels:
+          run: apigw-container
+  replicas: 1
+  template:
+      metadata:
+          labels:
+              run: apigw-container
+      spec:
+        containers:
+          - name: apigw-container
+            image: ironwolf1212/apigw
+            ports:
+            - containerPort: 4000
+            
