@@ -1,0 +1,152 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apigw-deployment
+spec:
+  selector:
+      matchLabels:
+          run: apigw-container
+  replicas: 1
+  template:
+      metadata:
+          labels:
+              run: apigw-container
+      spec:
+        containers:
+          - name: apigw-container
+            image: ironwolf1212/apigw:1.0.0
+            ports:
+            - containerPort: 4000
+            env:
+                - name: SALCHIPAPITAS-SERVICE
+                  value: http://salchipapitas-service:5000/
+                - name: BESOSCEREZAS-SERVICE
+                  value: http://besoscerezas-service:8080/
+                - name: AUTHSERVICE-SERVICE
+                  value: http://authservice-service:3000/
+          - name : redis-container
+            image: docker.io/redislabs/redis-di-cli:latest
+            ports:
+            - containerPort: 6379
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authservice-deployment
+spec:
+  selector:
+      matchLabels:
+          run: authservice-container
+  replicas: 1
+  template:
+      metadata:
+          labels:
+              run: authservice-container
+      spec:
+        containers:
+          - name: authservice-container
+            image: ironwolf1212/authservice:1.0.0
+            ports:
+            - containerPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: besoscerezas-deployment
+spec:
+  selector:
+      matchLabels:
+          run: besoscerezas-container
+  replicas: 1
+  template:
+      metadata:
+          labels:
+              run: besoscerezas-container
+      spec:
+        containers:
+          - name: besoscerezas-container
+            image: ironwolf1212/besoscerezas:v1
+            ports:
+            - containerPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: salchipapitas-deployment
+spec:
+  selector:
+      matchLabels:
+          run: salchipapitas-container
+  replicas: 1
+  template:
+      metadata:
+          labels:
+              run: salchipapitas-container
+      spec:
+        containers:
+          - name: salchipapitas-container
+            image: ironwolf1212/salchipapitas:v1
+            ports:
+            - containerPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: apigw-service
+  labels:
+    run: apigw-service
+spec:   
+  type: NodePort
+  selector: 
+    run: apigw-deployment
+  ports:
+  - port: 4000
+    protocol: TCP
+    targetPort: 4000
+    nodePort: 30001
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: authservice-service
+  labels:
+    run: authservice-service
+spec:   
+  type: NodePort
+  selector:
+    run: authservice-deployment
+  ports:
+  - port: 3000
+    targetPort: 3000
+    nodePort: 30002
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: salchipapitas-service
+  labels:
+    run: salchipapitas-service
+spec:   
+  type: NodePort
+  selector:
+    run: salchipapitas-deployment
+  ports:
+  - port: 5000
+    targetPort: 5000
+    nodePort: 30003
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: besoscerezas-service
+  labels:
+    run: besoscerezas-service
+spec:   
+  type: NodePort
+  selector:
+    run: besoscerezas-deployment
+  ports:
+  - port: 8080
+    targetPort: 8080
+    nodePort: 30004
+

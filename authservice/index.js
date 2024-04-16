@@ -7,7 +7,7 @@ const port = 3000;
 
 // Conexión a Redis
 const client = redis.createClient({
-    host: 'redis',
+    host: 'localhost',
     port: 6379
 });
 

@@ -14,7 +14,7 @@ const resolvers = {
     service1: async (parent, args, context, info) => {
       console.log(context.token);
       try {
-          const response = await axios.get('http://salchipapitas:5000/comestibles');
+          const response = await axios.get(process.env.SALCHIPAPITAS-SERVICE+'/comestibles');
           const data = response.data;
           return [...data.papas, ...data.salchichas];
       } catch (err) {
@@ -24,7 +24,7 @@ const resolvers = {
   },
   service2: async () => {
     try {
-        const response = await axios.get('http://besoscerezas:8080/besos');
+        const response = await axios.get(process.env.BESOSCEREZAS-SERVICE+'/besos');
         const data = response.data;
         let result = "Hola, soy servicio2 Besitos sabor cerezas! Aquí tienes algunos besos y sus frutas asociadas: ";
         for (const [key, value] of Object.entries(data)) {
@@ -45,7 +45,7 @@ async function getContext({ req }) {
     const token = authHeader.split('Bearer ')[1];
 
     try {
-        const response = await axios.post('http://authservice:3000/verify-token', { token: token });
+        const response = await axios.post(process.env.AUTHSERVICE-SERVICE+'/verify-token', { token: token });
         console.log(response.data)
         if (response.data && response.data.isValid) {
             return { token };
