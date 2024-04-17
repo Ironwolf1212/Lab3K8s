@@ -14,17 +14,16 @@ spec:
     spec:
       containers:
         - name: apigw-container
-          #image: danielfroseroz/apigtw:latest
-          image: satoru0x01/apigateway:2.1.0
+          image: danielfroseroz/apigw:latest
           ports:
           - containerPort: 4000
           env:
               - name: HOTELES_SERVICE
                 value: http://hoteles-service:3000/
               - name: VUELOS_SERVICE
-                value: http://vuelos-service:3100/   #Esta cosa esta en el puerto 3100
+                value: http://vuelos-service:3100/ 
               - name: RESTAURANTES_SERVICE
-                value: http://restaurantes-service:5000/
+                value: http://restaurantes-service:5000/   
 
 ---
 apiVersion: apps/v1
@@ -138,4 +137,3 @@ spec:
   - port: 5000
     targetPort: 5000
     nodePort: 30004
-
