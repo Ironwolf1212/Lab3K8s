@@ -4,26 +4,27 @@ metadata:
   name: apigw-deployment
 spec:
   selector:
-      matchLabels:
-          run: apigw-container
+    matchLabels:
+        run: apigw-container
   replicas: 1
   template:
-      metadata:
-          labels:
-              run: apigw-container
-      spec:
-        containers:
-          - name: apigw-container
-            image: danielfroseroz/apigtw:latest
-            ports:
-            - containerPort: 4000
-            env:
-                - name: HOTELES_SERVICE
-                  value: http://hoteles-service:3000/
-                - name: VUELOS_SERVICE
-                  value: http://vuelos-service:5000/
-                - name: RESTAURANTES_SERVICE
-                  value: http://restaurantes-service:8080/
+    metadata:
+      labels:
+        run: apigw-container
+    spec:
+      containers:
+        - name: apigw-container
+          #image: danielfroseroz/apigtw:latest
+          image: satoru0x01/apigateway:2.1.0
+          ports:
+          - containerPort: 4000
+          env:
+              - name: HOTELES_SERVICE
+                value: http://hoteles-service:3000/
+              - name: VUELOS_SERVICE
+                value: http://vuelos-service:3100/   #Esta cosa esta en el puerto 3100
+              - name: RESTAURANTES_SERVICE
+                value: http://restaurantes-service:5000/
 
 ---
 apiVersion: apps/v1
@@ -32,19 +33,19 @@ metadata:
   name: hoteles-deployment
 spec:
   selector:
-      matchLabels:
-          run: hoteles-container
+    matchLabels:
+        app: hoteles-selector
   replicas: 1
   template:
-      metadata:
-          labels:
-              run: hoteles-container
-      spec:
-        containers:
-          - name: hoteles-container
-            image: danielfroseroz/hoteles:1.0.0
-            ports:
-            - containerPort: 3000
+    metadata:
+      labels:
+        app: hoteles-selector
+    spec:
+      containers:
+        - name: hoteles-container
+          image: danielfroseroz/hoteles:1.0.0
+          ports:
+          - containerPort: 3000
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -52,19 +53,19 @@ metadata:
   name: restaurantes-deployment
 spec:
   selector:
-      matchLabels:
-          run: restaurantes-container
+    matchLabels:
+      app: restaurantes-selector
   replicas: 1
   template:
-      metadata:
-          labels:
-              run: restaurantes-container
-      spec:
-        containers:
-          - name: restaurantes-container
-            image: danielfroseroz/restaurantes:1.0.0
-            ports:
-            - containerPort: 8080
+    metadata:
+      labels:
+        app: restaurantes-selector
+    spec:
+      containers:
+        - name: restaurantes-container
+          image: danielfroseroz/restaurantes:1.0.0
+          ports:
+          - containerPort: 5000
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -72,46 +73,41 @@ metadata:
   name: vuelos-deployment
 spec:
   selector:
-      matchLabels:
-          run: vuelos-container
+    matchLabels:
+      app: vuelos-selector
   replicas: 1
   template:
-      metadata:
-          labels:
-              run: vuelos-container
-      spec:
-        containers:
-          - name: vuelos-container
-            image: danielfroseroz/vuelos:1.0.0
-            ports:
-            - containerPort: 5000
+    metadata:
+      labels:
+        app: vuelos-selector
+    spec:
+      containers:
+        - name: vuelos-container
+          image: danielfroseroz/vuelos:1.0.0
+          ports:
+          - containerPort: 3100
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: apigw-service
-  labels:
-    run: apigw-service
 spec:   
-  type: NodePort
   selector: 
-    run: apigw-deployment
+    app: apigw-deployment
   ports:
   - port: 4000
     protocol: TCP
     targetPort: 4000
-    nodePort: 30001
+  type: ClusterIP
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: hoteles-service
-  labels:
-    run: hoteles-service
 spec:   
   type: NodePort
   selector:
-    run: hoteles-deployment
+    app: hoteles-selector
   ports:
   - port: 3000
     targetPort: 3000
@@ -121,29 +117,25 @@ apiVersion: v1
 kind: Service
 metadata:
   name: vuelos-service
-  labels:
-    run: vuelos-service
 spec:   
   type: NodePort
   selector:
-    run: vuelos-deployment
+    app: vuelos-selector
   ports:
-  - port: 5000
-    targetPort: 5000
+  - port: 3100
+    targetPort: 3100
     nodePort: 30003
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: restaurantes-service
-  labels:
-    run: restaurantes-service
 spec:   
   type: NodePort
   selector:
-    run: restaurantes-deployment
+    app: restaurantes-selector
   ports:
-  - port: 8080
-    targetPort: 8080
+  - port: 5000
+    targetPort: 5000
     nodePort: 30004
 
